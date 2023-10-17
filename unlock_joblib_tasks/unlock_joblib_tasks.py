@@ -9,10 +9,11 @@ How to use:
 使用方法:
     :import unlock_joblib_tasks
     :unlock_joblib_tasks.please()
+
 This software is released under the BSD3 license, and anyone can use it for free without any restrictions.
 该软件在BSD3协议下发布，任何人都可无限制免费使用，希望对你有用！
 """
-__version__ = '1.0'
+__version__ = '1.1'
 
 import sys
 

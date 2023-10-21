@@ -1,6 +1,6 @@
 """
 @author: PlumeSoft
-@date: 2023-10-16
+@date: 2023-10-21
 
 Unlock the limit of 63 tasks in Windows for the Python joblib library.
 为 Python joblib 库解锁在 Windows 下最大 63 个任务数的限制的补丁包。
@@ -13,7 +13,7 @@ How to use:
 This software is released under the BSD3 license, and anyone can use it for free without any restrictions.
 该软件在BSD3协议下发布，任何人都可无限制免费使用，希望对你有用！
 """
-__version__ = '1.1'
+__version__ = '1.2'
 
 import sys
 
@@ -74,8 +74,9 @@ if sys.platform == "win32":
 def please() -> bool:
     if sys.platform == "win32":
         global Saved_WaitForMultipleObjects
-        Saved_WaitForMultipleObjects = _winapi.WaitForMultipleObjects
-        _winapi.WaitForMultipleObjects = Hacked_WaitForMultipleObjects
+        if Saved_WaitForMultipleObjects is None:
+            Saved_WaitForMultipleObjects = _winapi.WaitForMultipleObjects
+            _winapi.WaitForMultipleObjects = Hacked_WaitForMultipleObjects
         return True
     else:
         return False

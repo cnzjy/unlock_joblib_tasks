@@ -1,6 +1,6 @@
 """
 @author: PlumeSoft
-@date: 2023-10-21
+@date: 2024-02-06
 
 Unlock the limit of 63 tasks in Windows for the Python joblib library.
 为 Python joblib 库解锁在 Windows 下最大 63 个任务数的限制的补丁包。
@@ -13,12 +13,15 @@ How to use:
 This software is released under the BSD3 license, and anyone can use it for free without any restrictions.
 该软件在BSD3协议下发布，任何人都可无限制免费使用，希望对你有用！
 """
-__version__ = '1.2'
+__version__ = '1.3'
 
 import sys
 
 # 用于保存被 Hook 的 API
 Saved_WaitForMultipleObjects = None
+
+# 解锁以后支持的最大任务数
+_UNLOCKED_MAX_WINDOWS_WORKERS = 510
 
 if sys.platform == "win32":
     # 只在 Windows 平台下使用
@@ -73,10 +76,23 @@ if sys.platform == "win32":
 
 def please() -> bool:
     if sys.platform == "win32":
+        # 只在 Windows 平台下使用
         global Saved_WaitForMultipleObjects
         if Saved_WaitForMultipleObjects is None:
+            # 避免重复 Hook API
             Saved_WaitForMultipleObjects = _winapi.WaitForMultipleObjects
             _winapi.WaitForMultipleObjects = Hacked_WaitForMultipleObjects
+
+        try:
+            # 新版本的 joblib 中有 _MAX_WINDOWS_WORKERS 对任务数进行了限制，此处需要强制修改该参数
+            import joblib.externals.loky.backend.context as context
+            if hasattr(context, '_MAX_WINDOWS_WORKERS'):
+                setattr(context, '_MAX_WINDOWS_WORKERS', _UNLOCKED_MAX_WINDOWS_WORKERS)
+            import joblib.externals.loky.process_executor as process_executor
+            if hasattr(process_executor, '_MAX_WINDOWS_WORKERS'):
+                setattr(process_executor, '_MAX_WINDOWS_WORKERS', _UNLOCKED_MAX_WINDOWS_WORKERS)
+        except:
+            pass
         return True
     else:
         return False
